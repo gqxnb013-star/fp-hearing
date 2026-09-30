@@ -80,6 +80,7 @@ function renderInput(q) {
   const v = A[q.id];
   switch (q.type) {
     case 'text':
+    case 'kana':
       return `<input type="text" class="inp" name="${q.id}" maxlength="${q.max || 100}" placeholder="${esc(q.placeholder || '')}" value="${esc(v || '')}" autocomplete="off">`;
     case 'textarea':
       return `<textarea class="inp" name="${q.id}" rows="3" maxlength="${q.max || 500}" placeholder="${esc(q.placeholder || '')}">${esc(v || '')}</textarea>`;
@@ -97,12 +98,15 @@ function renderInput(q) {
     case 'children': {
       const n = Math.min(Number(A.childCount || 0), 5);
       const years = birthYears();
-      let h = '<div class="grid2">';
+      let h = '';
       for (let i = 1; i <= n; i++) {
-        h += `<label class="sub">${i}人目<select class="inp" name="child${i}"><option value="">選んでください</option>${years
-          .map((o) => `<option value="${o.v}"${A['child' + i] === o.v ? ' selected' : ''}>${o.l}</option>`).join('')}</select></label>`;
+        h += `<div class="child"><span class="visit-no">${i}人目</span>
+          <label class="sub">お名前<input type="text" class="inp" name="child${i}Name" maxlength="40" placeholder="例：山田 さくら" value="${esc(A['child' + i + 'Name'] || '')}" autocomplete="off"></label>
+          <label class="sub">ふりがな（カタカナ）<input type="text" class="inp" name="child${i}Kana" maxlength="40" placeholder="例：ヤマダ サクラ" value="${esc(A['child' + i + 'Kana'] || '')}" autocomplete="off"></label>
+          <label class="sub">生まれ年<select class="inp" name="child${i}"><option value="">選んでください</option>${years
+          .map((o) => `<option value="${o.v}"${A['child' + i] === o.v ? ' selected' : ''}>${o.l}</option>`).join('')}</select></label></div>`;
       }
-      return h + '</div>';
+      return h;
     }
     case 'visits': {
       let h = '<p class="q-note">だいたいの時期で大丈夫です。</p>';
@@ -130,10 +134,17 @@ function readInput(el) {
     A[`v${i}To`] = el.checked ? 'now' : to.value;
   } else if (el.type === 'checkbox') {
     A[name] = [...document.querySelectorAll(`[name="${name}"]:checked`)].map((x) => x.value);
+  } else if (isKanaField(name)) {
+    // 入力中（変換中）に欄の文字は書き換えず、保存する値だけカタカナにそろえる
+    A[name] = toKatakana(el.value);
   } else {
     A[name] = el.value;
   }
   saveDraft();
+}
+
+function isKanaField(name) {
+  return name === 'kana' || name === 'spouseKana' || /^child\dKana$/.test(name);
 }
 
 /** 表示条件（showIf）に合わない質問を隠す。人数が変わったら子の欄を作り直す */
@@ -165,6 +176,15 @@ function validateStep(i) {
     let msg = '';
     const v = A[q.id];
     if (q.required && (!v || !String(v).trim())) msg = 'ご入力ください。';
+    if (!msg && q.type === 'kana' && v && !isKatakana(v)) msg = 'カタカナでご入力ください。';
+    if (!msg && q.type === 'children') {
+      const bad = [];
+      for (let k = 1; k <= Math.min(Number(A.childCount || 0), 5); k++) {
+        const kv = A['child' + k + 'Kana'];
+        if (kv && !isKatakana(kv)) bad.push(k + '人目');
+      }
+      if (bad.length) msg = `${bad.join('・')}のふりがなは、カタカナでご入力ください。`;
+    }
     if (!msg && q.type === 'date' && v && ageFromDate(v) == null) msg = '日付の形式をご確認ください。';
     if (!msg && q.id === 'birth' && v) {
       const age = ageFromDate(v);
@@ -193,7 +213,7 @@ function renderConfirm() {
 
 /** 平らにした行の id が、どのステップの質問かを返す */
 function stepOf(id) {
-  const base = /^child\d$/.test(id) ? 'children' : /^visit\d$/.test(id) ? 'visits' : id;
+  const base = /^child\d(Name|Kana)?$/.test(id) ? 'children' : /^visit\d$/.test(id) ? 'visits' : id;
   return STEPS.findIndex((s) => s.q.some((q) => q.id === base));
 }
 
@@ -281,6 +301,8 @@ function init() {
   $('#step-body').addEventListener('input', (e) => { readInput(e.target); if (e.target.type !== 'text' && e.target.tagName !== 'TEXTAREA') applyVisibility(); });
   $('#step-body').addEventListener('change', (e) => {
     readInput(e.target);
+    // ふりがなは入力が終わったところで、欄の文字もカタカナにそろえる
+    if (isKanaField(e.target.name)) e.target.value = A[e.target.name] || '';
     // 子の人数が変わったら、生まれ年の欄を作り直す
     if (e.target.name === 'childCount') { const box = $('[data-q="children"]'); if (box) box.outerHTML = renderQuestion(STEPS[current].q.find((q) => q.id === 'children')); }
     applyVisibility();

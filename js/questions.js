@@ -61,6 +61,7 @@ const STEPS = [
     lead: 'まずはご本人について教えてください。',
     q: [
       { id: 'name', label: 'お名前', type: 'text', required: true, placeholder: '例：山田 花子', max: 40 },
+      { id: 'kana', label: 'ふりがな（カタカナ）', type: 'kana', required: true, placeholder: '例：ヤマダ ハナコ', max: 40 },
       { id: 'birth', label: '生年月日', type: 'date', required: true },
       { id: 'gender', label: '性別', type: 'single', options: [opt('f', '女性'), opt('m', '男性'), opt('x', '答えたくない')],
         note: '保険料や公的年金の条件が性別で変わるため、お伺いしています。' },
@@ -76,12 +77,14 @@ const STEPS = [
     key: 'family', title: 'ご家族のこと',
     q: [
       { id: 'spouse', label: '配偶者・パートナー', type: 'single', options: [opt('yes', 'いる'), opt('no', 'いない')] },
+      { id: 'spouseName', label: '配偶者・パートナーのお名前', type: 'text', placeholder: '例：山田 太郎', max: 40, showIf: (A) => A.spouse === 'yes' },
+      { id: 'spouseKana', label: '配偶者・パートナーのふりがな（カタカナ）', type: 'kana', placeholder: '例：ヤマダ タロウ', max: 40, showIf: (A) => A.spouse === 'yes' },
       { id: 'spouseBirth', label: '配偶者・パートナーの生年月日', type: 'date', showIf: (A) => A.spouse === 'yes' },
       { id: 'spouseJob', label: '配偶者・パートナーの働き方', type: 'single', options: JOBS, showIf: (A) => A.spouse === 'yes' },
       { id: 'spouseIncome', label: '配偶者・パートナーの年収（税込み）', type: 'select', options: incomeBands(), showIf: (A) => A.spouse === 'yes' },
       { id: 'childCount', label: 'お子さまの人数', type: 'select',
         options: [opt('0', 'いない'), opt('1', '1人'), opt('2', '2人'), opt('3', '3人'), opt('4', '4人'), opt('5', '5人以上')] },
-      { id: 'children', label: 'お子さまの生まれ年', type: 'children', showIf: (A) => Number(A.childCount) > 0 },
+      { id: 'children', label: 'お子さまのお名前と生まれ年', type: 'children', note: 'お名前とふりがなは、わかる範囲で大丈夫です。', showIf: (A) => Number(A.childCount) > 0 },
       { id: 'plans', label: 'これからの予定（いくつでも）', type: 'multi',
         options: [opt('marry', '結婚'), opt('baby', '出産'), opt('house', '住宅の購入'), opt('job', '転職・独立'), opt('none', '特になし')] },
     ],
@@ -191,7 +194,11 @@ function flattenAnswers(A) {
   STEPS.forEach((s) => s.q.forEach((q) => {
     if (q.showIf && !q.showIf(A)) return;
     if (q.type === 'children') {
-      for (let i = 1; i <= Number(A.childCount || 0); i++) rows.push(['child' + i, `お子さま${i}人目の生まれ年`, A['child' + i] ? A['child' + i] + '年' : '']);
+      for (let i = 1; i <= Math.min(Number(A.childCount || 0), 5); i++) {
+        rows.push(['child' + i + 'Name', `お子さま${i}人目のお名前`, A['child' + i + 'Name'] || '']);
+        rows.push(['child' + i + 'Kana', `お子さま${i}人目のふりがな`, A['child' + i + 'Kana'] || '']);
+        rows.push(['child' + i, `お子さま${i}人目の生まれ年`, A['child' + i] ? A['child' + i] + '年' : '']);
+      }
       return;
     }
     if (q.type === 'visits') {
@@ -205,6 +212,17 @@ function flattenAnswers(A) {
     rows.push([q.id, q.label, displayValue(q, A[q.id])]);
   }));
   return rows;
+}
+
+/** ふりがな：ひらがなはカタカナに直し、空白は半角1つにそろえる */
+function toKatakana(s) {
+  return String(s || '')
+    .replace(/[\u3041-\u3096]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60))
+    .replace(/[\s\u3000]+/g, ' ')
+    .trim();
+}
+function isKatakana(s) {
+  return /^[\u30A1-\u30FA\u30FC\u30FB ]+$/.test(s);
 }
 
 function displayValue(q, v) {
