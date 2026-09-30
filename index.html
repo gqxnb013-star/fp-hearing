@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>保険のご相談 事前ヒアリング</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <p class="eyebrow">PRE-MEETING SHEET</p>
+    <h1>保険のご相談 事前ヒアリング</h1>
+    <p class="by">担当：<span data-fp-name></span></p>
+  </header>
+
+  <main class="wrap">
+    <p id="token-warning" class="banner-warn" hidden>このページは、ご案内したリンクから開いてください（このままでは送信できません）。</p>
+
+    <!-- 同意 -->
+    <section id="view-consent" class="card">
+      <h2 class="step-title">はじめに</h2>
+      <p>次回のお話を短く、分かりやすくするために、事前にいくつか教えてください。<strong>所要時間は10〜15分</strong>です。ほとんどの質問はタップで選ぶだけで、わからない質問は「わからない」を選んでいただいて大丈夫です。</p>
+
+      <div class="consent-box">
+        <h3>個人情報の取り扱いについて</h3>
+        <dl class="consent-list">
+          <dt>使う目的</dt>
+          <dd>ご加入中の保険を整理した資料と、保険のご提案資料を作るためだけに使います。</dd>
+          <dt>お伺いする内容</dt>
+          <dd>ご家族・収入・住まい・資産・加入中の保険・保障と運用のご希望、および<strong>健康に関する情報</strong>（通院・入院などの有無と時期、健康診断の結果表の有無）。病名や理由はお伺いしません。</dd>
+          <dt>保存先と見られる人</dt>
+          <dd>担当の<span data-fp-name></span>が管理するGoogleスプレッドシートに保存します。見られるのは<span data-fp-name></span>のみです。</dd>
+          <dt>第三者への提供</dt>
+          <dd>しません。保険のお申込みに進む場合は、あらためてご説明し、同意をいただきます。</dd>
+          <dt>確認・削除のご依頼</dt>
+          <dd><a data-line-url target="_blank" rel="noopener">公式LINE</a>からいつでもご連絡ください。</dd>
+        </dl>
+      </div>
+
+      <label class="agree"><input type="checkbox" id="agree"><span>上記の内容を確認し、同意します（健康に関する情報を含みます）</span></label>
+      <button type="button" class="btn btn-primary btn-block" id="btn-agree" disabled>同意してはじめる</button>
+    </section>
+
+    <!-- 入力 -->
+    <section id="view-form" class="card" hidden>
+      <div class="progress"><div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div><p id="progress-text" class="progress-text"></p></div>
+      <div id="step-body"></div>
+      <div class="step-nav">
+        <button type="button" class="btn btn-ghost" id="btn-back">戻る</button>
+        <button type="button" class="btn btn-primary" id="btn-next">次へ</button>
+      </div>
+    </section>
+
+    <!-- 確認 -->
+    <section id="view-confirm" class="card" hidden>
+      <h2 class="step-title">入力内容の確認</h2>
+      <p class="lead">内容をご確認のうえ「送信する」を押してください。直したいところは「修正する」から戻れます。</p>
+      <div id="confirm-body"></div>
+      <p id="send-error" class="banner-warn" hidden></p>
+      <div class="step-nav">
+        <button type="button" class="btn btn-ghost" id="btn-confirm-back">戻る</button>
+        <button type="button" class="btn btn-primary" id="btn-send">送信する</button>
+      </div>
+    </section>
+
+    <!-- 完了 -->
+    <section id="view-done" class="card" hidden>
+      <h2 class="step-title">ありがとうございました</h2>
+      <p>送信が完了しました。受付番号：<strong id="done-no"></strong></p>
+      <div class="next-box">
+        <h3>最後にもうひとつだけ</h3>
+        <p>次のものがお手元にあれば、<strong>公式LINEに写真を送ってください</strong>。資料づくりに使います。</p>
+        <ul>
+          <li>保険証券、または保険の設計書（すべてのページ）</li>
+          <li>直近の健康診断の結果表</li>
+        </ul>
+        <a class="btn btn-line btn-block" data-line-url target="_blank" rel="noopener">公式LINEを開いて写真を送る</a>
+      </div>
+      <p class="muted small">このページは閉じていただいて大丈夫です。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer"><span data-fp-name></span></footer>
+
+  <script src="js/calc.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/figures.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
