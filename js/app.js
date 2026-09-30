@@ -233,7 +233,8 @@ async function send() {
     return;
   }
   btn.disabled = true;
-  btn.textContent = '送信しています…（20秒ほどかかることがあります）';
+  btn.textContent = '送信中…';
+  $('#send-wait').hidden = false;
   // 送信ID：1回の回答に1つ。届いたのに応答が失敗して再送されても、GAS 側で二重に登録しない
   if (!A._sid) {
     A._sid = newSendId();
@@ -258,6 +259,7 @@ async function send() {
   } finally {
     btn.disabled = false;
     btn.textContent = '送信する';
+    $('#send-wait').hidden = true;
   }
 }
 
