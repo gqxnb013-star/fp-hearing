@@ -31,17 +31,29 @@ const PUBLIC = {
  */
 function publicProfile(A) {
   const band = parseBand(A.income);
-  // 自分が勤務先の健康保険に入っている＝厚生年金にも入っているとみなす
-  // （わからない場合は働き方で判断する）
+  // 厚生年金（遺族年金・障害年金）は働き方で判断する。
+  // 会社員でも国民健康保険組合（建設国保など）の人は、健康保険は国保でも厚生年金には入っているため。
+  // 家族の扶養に入っている人は、厚生年金にも入っていない（第3号被保険者）とみなす。
+  // 会社員・公務員以外（自営業で法人の役員になっている人、パートなど）は、勤務先の健康保険に入っているかで判断する
   let employee;
-  if (A.health === 'work') employee = true;
-  else if (A.health === 'kokuho' || A.health === 'fuyou') employee = false;
-  else employee = A.job === 'employee' || A.job === 'civil';
+  if (A.health === 'fuyou') employee = false;
+  else if (A.job === 'employee' || A.job === 'civil') employee = true;
+  else employee = A.health === 'work';
+
+  // 傷病手当金は健康保険で判断する（勤務先の健康保険に自分で入っている人だけ。わからない場合は働き方で判断）
+  let sickEligible;
+  if (A.health === 'work') sickEligible = true;
+  else if (A.health === 'kokuho' || A.health === 'fuyou') sickEligible = false;
+  else sickEligible = employee;
+  // 会社員・公務員なのに国民健康保険を選んだ場合（国保組合など）は、画面で注意書きを出す
+  const kokuhoEmployee = employee && A.health === 'kokuho';
 
   const kids = childrenUnder18(A);
   return {
     band, // { lo, hi } 円。hi が null なら上限なし
-    employee,
+    employee, // 厚生年金に入っているか
+    sickEligible, // 傷病手当金の対象か
+    kokuhoEmployee,
     hasSpouse: A.spouse === 'yes',
     gender: A.gender, // 'm' | 'f' | 'x'
     age: ageFromDate(A.birth),
@@ -119,7 +131,7 @@ function byBand(band, fn) {
  * 賞与は聞いていないため、年収÷12 を月給とみなす（賞与がある人は実際より多めに出る）
  * ---------------------------------------------------------------- */
 function sickAllowance(P) {
-  if (!P.employee) return { eligible: false };
+  if (!P.sickEligible) return { eligible: false };
   return {
     eligible: true,
     monthly: byBand(P.band, (y) => (y / 12) * PUBLIC.sickRate),
