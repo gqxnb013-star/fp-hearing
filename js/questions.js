@@ -94,6 +94,9 @@ const STEPS = [
     q: [
       { id: 'house', label: 'お住まい', type: 'single',
         options: [opt('rent', '賃貸'), opt('loan', '持ち家（住宅ローンあり）'), opt('own', '持ち家（ローンなし）'), opt('parents', '実家'), opt('other', 'その他')] },
+      { id: 'expense', label: '毎月の支出のおおよその額（ご家族全体）', type: 'select',
+        options: [opt('e0-20', '20万円未満'), opt('e20-25', '20〜25万円'), opt('e25-30', '25〜30万円'), opt('e30-35', '30〜35万円'), opt('e35-40', '35〜40万円'), opt('e40-50', '40〜50万円'), opt('e50-', '50万円以上'), UNKNOWN],
+        note: '住まい・食費・教育費・保険料などを含めた、だいたいの額で大丈夫です。万一のときに必要な金額の目安に使います。' },
       { id: 'savings', label: '預貯金のおおよその額', type: 'select',
         options: [opt('s0-100', '100万円未満'), opt('s100-300', '100〜300万円'), opt('s300-500', '300〜500万円'), opt('s500-1000', '500〜1,000万円'), opt('s1000-', '1,000万円以上'), NOANSWER] },
       { id: 'nisa', label: 'NISA', type: 'single', options: [opt('yes', '使っている'), opt('no', '使っていない'), UNKNOWN] },
