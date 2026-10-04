@@ -8,7 +8,7 @@
 
 const CONFIG = {
   fpName: '宮崎 大輔',
-  lineUrl: 'https://lin.ee/zhjRjmC',
+  lineUrl: 'https://line.me/R/ti/p/@936gkqct', // DAIFP 宮崎大輔（2026-10-04 リッチメニューと揃えて変更）
   // GAS を公開したら、発行された Web アプリの URL をここに入れる
   gasUrl: 'https://script.google.com/macros/s/AKfycbz7pvlI_yK4_5i9vw0rKUtu1acb2AaVtlDu1zwCBSazVTWh-rJrsz3IEREwZfeCHwFwWA/exec',
 };
